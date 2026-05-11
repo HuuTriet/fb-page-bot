@@ -6,7 +6,7 @@ const required = [
   'FB_PAGE_ID',
   'FB_PAGE_ACCESS_TOKEN',
   'FB_VERIFY_TOKEN',
-  'ANTHROPIC_API_KEY',
+  'GROQ_API_KEY',
 ];
 for (const k of required) {
   if (!process.env[k]) {
@@ -24,9 +24,9 @@ export const config = {
     verifyToken: process.env.FB_VERIFY_TOKEN,
     apiVersion: 'v21.0',
   },
-  anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: process.env.ANTHROPIC_MODEL || 'claude-opus-4-7',
+  groq: {
+    apiKey: process.env.GROQ_API_KEY,
+    model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
   },
   admin: {
     token: process.env.ADMIN_TOKEN || '',

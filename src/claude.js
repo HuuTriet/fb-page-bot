@@ -1,33 +1,38 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { config } from './config.js';
 
-const client = new Anthropic({ apiKey: config.anthropic.apiKey });
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-function extractText(content) {
-  return content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
+async function groqChat({ system, messages, maxTokens = 512 }) {
+  const body = {
+    model: config.groq.model,
+    max_tokens: maxTokens,
+    messages: [
+      ...(system ? [{ role: 'system', content: system }] : []),
+      ...messages,
+    ],
+  };
+
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.groq.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Groq ${res.status}: ${txt}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? '';
 }
 
 export async function generateReply({ systemPrompt, userMessage, context = [] }) {
   const messages = [...context, { role: 'user', content: userMessage }];
-
-  const res = await client.messages.create({
-    model: config.anthropic.model,
-    max_tokens: 512,
-    thinking: { type: 'adaptive' },
-    system: [
-      {
-        type: 'text',
-        text: systemPrompt,
-        cache_control: { type: 'ephemeral' },
-      },
-    ],
-    messages,
-  });
-
-  return extractText(res.content);
+  return groqChat({ system: systemPrompt, messages, maxTokens: 512 });
 }
 
 export async function shouldHideComment(text, blacklistContext = '') {
@@ -39,14 +44,12 @@ export async function shouldHideComment(text, blacklistContext = '') {
     (blacklistContext ? `Ngữ cảnh fanpage: ${blacklistContext}\n` : '') +
     'Chỉ trả về JSON, không có text khác.';
 
-  const res = await client.messages.create({
-    model: config.anthropic.model,
-    max_tokens: 200,
+  const txt = await groqChat({
     system: sys,
     messages: [{ role: 'user', content: text }],
+    maxTokens: 200,
   });
 
-  const txt = extractText(res.content);
   try {
     const m = txt.match(/\{[\s\S]*\}/);
     if (!m) return { hide: false, reason: 'no_json' };

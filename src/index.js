@@ -16,7 +16,7 @@ app.use(
 );
 
 app.get('/', (_req, res) => {
-  res.json({ ok: true, name: 'fb-page-bot', model: config.anthropic.model });
+  res.json({ ok: true, name: 'fb-page-bot', model: config.groq.model });
 });
 
 app.use('/webhook', webhookRouter);

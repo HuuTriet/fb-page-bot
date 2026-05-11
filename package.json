@@ -1,7 +1,7 @@
 {
   "name": "fb-page-bot",
   "version": "1.0.0",
-  "description": "Facebook fanpage management bot with Claude AI",
+  "description": "Facebook fanpage management bot with Groq (Llama 3.3)",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
@@ -12,7 +12,6 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.40.0",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
